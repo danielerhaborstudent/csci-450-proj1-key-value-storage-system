@@ -16,7 +16,7 @@ from __future__ import print_function
 
 import library
 
-# Where to find the server. This assumes it's running on the smae machine
+# Where to find the server. This assumes it's running on the same machine
 # as the proxy, but on a different port.
 SERVER_ADDRESS = 'localhost'
 SERVER_PORT = 7777
@@ -40,7 +40,10 @@ def ForwardCommandToServer(command, server_addr, server_port):
   Returns:
     A single line string response with no newlines.
   """
-
+  server_sock = library.Createserver_sock(server_port)
+  server_sock.sendto(command, server_addr)
+  response = library.ReadCommand(server_sock)
+  return response
   ###################################################
   #TODO: Implement Function: WiP
   ###################################################
@@ -60,7 +63,7 @@ def CheckCachedResponse(command_line, cache):
   ############################
   #TODO: Implement section
   ############################
-  
+
 
 
 def ProxyClientCommand(sock, server_addr, server_port, cache):

@@ -80,7 +80,11 @@ def ReadCommand(sock):
     #############################################
     #TODO: Implement ReadCommand Function
     #############################################
-    
+    command = sock.recv(COMMAND_BUFFER_SIZE)
+    command = command + "\n" if command[len(command)-1] != "\n" else command
+
+    return command
+
 
 
 
@@ -123,6 +127,8 @@ class KeyValueStore(object):
     ###########################################
     #TODO: Implement __init__ Function
     ###########################################
+    self.storage = {}
+
 
 
   def GetValue(self, key, max_age_in_sec=None):
@@ -138,10 +144,14 @@ class KeyValueStore(object):
       None or the value.
     """
     # Check if we've ever put something in the cache.
+    if not self.storage.get(key):
+        return None
+
 
     ###########################################
     #TODO: Implement GetValue Function
     ###########################################
+    return self.storage.get(key)
 
 
 
@@ -156,7 +166,7 @@ class KeyValueStore(object):
     ###########################################
     #TODO: Implement StoreValue Function
     ###########################################
-
+    self.storage[key] = value
 
 
   def Keys(self):
@@ -165,3 +175,4 @@ class KeyValueStore(object):
     ###########################################
     #TODO: Implement Keys Function
     ###########################################
+    return self.storage.keys()
