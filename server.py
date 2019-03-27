@@ -60,8 +60,10 @@ def PutCommand(name, text, database):
     ##########################################
     #TODO: Implement PUT function
     ##########################################
-    database[text] = name
-    return text + " = " + database[text]
+    # database[text] = name
+    # return text + " = " + database[text]
+    database.StoreValue(name,text)
+    return name + " = " + text
 
 
 
@@ -80,7 +82,9 @@ def GetCommand(name, database):
     ##########################################
     #TODO: Implement GET function
     ##########################################
-    pass
+
+    value = database.GetValue(name)
+    return ("%s has no entry in database" % name) if not value else value
 
 
 def DumpCommand(database):
@@ -98,7 +102,7 @@ def DumpCommand(database):
     ##########################################
     #TODO: Implement DUMP function
     ##########################################
-    return ', '.join(database.keys())
+    return ', '.join(database.Keys())
 
 
 
@@ -124,6 +128,9 @@ def main():
 
         # Read a command.
         command_line = library.ReadCommand(client_sock)
+
+
+
         command, name, text = library.ParseCommand(command_line)
 
         # Execute the command based on the first word in the command line.
@@ -138,12 +145,13 @@ def main():
 
         SendText(client_sock, result)
 
+        client_sock.close()
     # We're done with the client, so clean up the socket.
 
     #################################
     #TODO: Close socket's connection
     #################################
-    client_sock.close()
+    # client_sock.close()
     server_sock.close()
 
 

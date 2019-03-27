@@ -59,10 +59,11 @@ def ConnectClientToServer(server_sock):
 
     # Establish connection with client.
     # CreateClientSocket(server, port)
+    # CreateClientSocket(sever_sock.getsockname, port)
     client_sock, addr = server_sock.accept()
 
 
-    return client_sock, (addr,"Useless value")
+    return client_sock, addr
 
 
 
@@ -83,10 +84,16 @@ def ReadCommand(sock):
     #############################################
     #TODO: Implement ReadCommand Function
     #############################################
-    command = sock.recv(COMMAND_BUFFER_SIZE)
-    command = command + "\n" if command[-1] != "\n" else command
-
-    return command
+    command_line = ""
+    data = sock.recv(COMMAND_BUFFER_SIZE)
+    # while data:
+    #     print(data)
+    #     command_line += data
+    #     data = sock.recv(COMMAND_BUFFER_SIZE)
+    command_line += data
+    command_line = command_line + "\n" if command_line[-1] != "\n" else command_line
+    # print(command_line)
+    return command_line
 
 
 

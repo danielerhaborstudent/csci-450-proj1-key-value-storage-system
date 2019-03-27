@@ -101,7 +101,7 @@ def ProxyClientCommand(sock, server_addr, server_port, cache):
     if not response:
         response = ForwardCommandToServer(command_line, server_addr, server_port)
 
-    sock.send(response)
+    sock.sendall(response)
 
 
 
@@ -122,8 +122,8 @@ def main():
     #################################
     #TODO: Close socket's connection
     #################################
-    client_sock.close()
-    server_sock.close()
+    # client_sock.close()
+    # server_sock.close()
 
 
 main()
