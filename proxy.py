@@ -31,80 +31,99 @@ MAX_CACHE_AGE_SEC = 60.0  # 1 minute
 
 
 def ForwardCommandToServer(command, server_addr, server_port):
-  """Opens a TCP socket to the server, sends a command, and returns response.
+    """Opens a TCP socket to the server, sends a command, and returns response.
 
-  Args:
+    Args:
     command: A single line string command with no newlines in it.
     server_addr: A string with the name of the server to forward requests to.
     server_port: An int from 0 to 2^16 with the port the server is listening on.
-  Returns:
+    Returns:
     A single line string response with no newlines.
-  """
-  server_sock = library.Createserver_sock(server_port)
-  server_sock.sendto(command, server_addr)
-  response = library.ReadCommand(server_sock)
-  return response
-  ###################################################
-  #TODO: Implement Function: WiP
-  ###################################################
+    """
+    server_sock = library.CreateServerSocket(server_port)
+
+    server_sock.sendto(command, server_addr)
+
+    ###################################################
+    #TODO: Implement Function: WiP
+    ###################################################
 
 
 
 def CheckCachedResponse(command_line, cache):
-  cmd, name, text = library.ParseCommand(command_line)
+    cmd, name, text = library.ParseCommand(command_line)
 
-  # Update the cache for PUT commands but also pass the traffic to the server.
-  ##########################
-  #TODO: Implement section
-  ##########################
+    # Update the cache for PUT commands but also pass the traffic to the server.
 
-  # GET commands can be cached.
+    ##########################
+    #TODO: Implement section
+    ##########################
+    response = None
+    if cmd == "PUT":
+      cache[name] = text
+      response = cache[name] + " = " + text
 
-  ############################
-  #TODO: Implement section
-  ############################
+
+    # GET commands can be cached.
+
+    ############################
+    #TODO: Implement section
+    ############################
+    elif cmd == "GET" and cache.get(name):
+        response = cache.get(name)
+    return response
+
+
 
 
 
 def ProxyClientCommand(sock, server_addr, server_port, cache):
-  """Receives a command from a client and forwards it to a server:port.
+    """Receives a command from a client and forwards it to a server:port.
 
-  A single command is read from `sock`. That command is passed to the specified
-  `server`:`port`. The response from the server is then passed back through
-  `sock`.
+    A single command is read from `sock`. That command is passed to the specified
+    `server`:`port`. The response from the server is then passed back through
+    `sock`.
 
-  Args:
+    Args:
     sock: A TCP socket that connects to the client.
     server_addr: A string with the name of the server to forward requests to.
     server_port: An int from 0 to 2^16 with the port the server is listening on.
     cache: A KeyValueStore object that maintains a temorary cache.
     max_age_in_sec: float. Cached values older than this are re-retrieved from
       the server.
-  """
+    """
 
-  ###########################################
-  #TODO: Implement ProxyClientCommand
-  ###########################################
+    ###########################################
+    #TODO: Implement ProxyClientCommand
+    ###########################################
+    command_line = library.ReadCommand(sock)
+    response = CheckCachedResponse(command_line, cache)
+    if not response:
+        response = ForwardCommandToServer(command_line, server_addr, server_port)
+
+    sock.send(response)
 
 
 
 
 def main():
-  # Listen on a specified port...
-  server_sock = library.CreateServerSocket(LISTENING_PORT)
-  cache = library.KeyValueStore()
-  # Accept incoming commands indefinitely.
-  while True:
-    # Wait until a client connects and then get a socket that connects to the
-    # client.
-    client_sock, (address, port) = library.ConnectClientToServer(server_sock)
-    print('Received connection from %s:%d' % (address, port))
-    ProxyClientCommand(client_sock, SERVER_ADDRESS, SERVER_PORT,
-                       cache)
+    # Listen on a specified port...
+    server_sock = library.CreateServerSocket(LISTENING_PORT)
+    cache = library.KeyValueStore()
+    # Accept incoming commands indefinitely.
+    while True:
+        # Wait until a client connects and then get a socket that connects to the
+        # client.
+        client_sock, (address, port) = library.ConnectClientToServer(server_sock)
+        print('Received connection from %s:%d' % (address, port))
+        ProxyClientCommand(client_sock, SERVER_ADDRESS, SERVER_PORT,
+                           cache)
 
-  #################################
-  #TODO: Close socket's connection
-  #################################
+    #################################
+    #TODO: Close socket's connection
+    #################################
+    client_sock.close()
+    server_sock.close()
 
 
 main()

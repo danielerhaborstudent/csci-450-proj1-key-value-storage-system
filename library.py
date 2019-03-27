@@ -26,26 +26,27 @@ import time
 COMMAND_BUFFER_SIZE = 256
 
 
-def Createserver_sock(port):
-  """Creates a socket that listens on a specified port.
+def CreateServerSocket(port):
+    """Creates a socket that listens on a specified port.
 
-  Args:
+    Args:
     port: int from 0 to 2^16. Low numbered ports have defined purposes. Almost
-        all predefined ports represent insecure protocols that have died out.
-  Returns:
+    all predefined ports represent insecure protocols that have died out.
+    Returns:
     A socket that implements TCP/IP.
-  """
+    """
 
     #############################################
     #TODO: Implement Createserver_sock Function
     #############################################
-          #create an INET, STREAMing socket
-    server_sock = socket.socket(
-        socket.AF_INET, socket.SOCK_STREAM)
+    #create an INET, STREAMing socket
+    server_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
     # Listen on specified port
-    server_sock.bind(('', port)
+    server_sock.bind(('', port))
     server_sock.listen(5)
+
+
     return server_sock
 
 
@@ -57,31 +58,33 @@ def ConnectClientToServer(server_sock):
     #############################################
 
     # Establish connection with client.
+    # CreateClientSocket(server, port)
     client_sock, addr = server_sock.accept()
 
-    return client_sock
+
+    return client_sock, (addr,"Useless value")
 
 
 
 def CreateClientSocket(server_addr, port):
-  """Creates a socket that connects to a port on a server."""
+    """Creates a socket that connects to a port on a server."""
 
     #############################################
     #TODO: Implement CreateClientSocket Function
     #############################################
-    client_sock = socket.socket()
+    client_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     client_sock.connect((server_addr, port))
     return client_sock
 
 
 def ReadCommand(sock):
-  """Read a single command from a socket. The command must end in newline."""
+    """Read a single command from a socket. The command must end in newline."""
 
     #############################################
     #TODO: Implement ReadCommand Function
     #############################################
     command = sock.recv(COMMAND_BUFFER_SIZE)
-    command = command + "\n" if command[len(command)-1] != "\n" else command
+    command = command + "\n" if command[-1] != "\n" else command
 
     return command
 
