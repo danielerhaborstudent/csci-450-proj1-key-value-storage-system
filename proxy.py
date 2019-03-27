@@ -40,9 +40,15 @@ def ForwardCommandToServer(command, server_addr, server_port):
     Returns:
     A single line string response with no newlines.
     """
-    server_sock = library.CreateServerSocket(server_port)
 
-    server_sock.sendto(command, server_addr)
+    proxy_as_client = library.CreateClientSocket(server_addr, server_port)
+
+
+    proxy_as_client.sendto(command, (server_addr, server_port) )
+    response_from_server = library.ReadCommand(proxy_as_client)
+    # proxy_as_client.close()
+
+    return response_from_server.strip()
 
     ###################################################
     #TODO: Implement Function: WiP
@@ -58,10 +64,12 @@ def CheckCachedResponse(command_line, cache):
     ##########################
     #TODO: Implement section
     ##########################
+    # If the response is None this means that we should forward the PUT or GET command.
+    # We always forward on the PUT command but use cached value for GET if it is in the cache
+    # See the usage in ProxyClientCommand
     response = None
     if cmd == "PUT":
-      cache[name] = text
-      response = cache[name] + " = " + text
+      cache.StoreValue(name, text)
 
 
     # GET commands can be cached.
@@ -69,15 +77,15 @@ def CheckCachedResponse(command_line, cache):
     ############################
     #TODO: Implement section
     ############################
-    elif cmd == "GET" and cache.get(name):
-        response = cache.get(name)
+    elif cmd == "GET" and name in cache.Keys():
+        response = cache.GetValue(name)
     return response
 
 
 
 
 
-def ProxyClientCommand(sock, server_addr, server_port, cache):
+def ProxyClientCommand(client_sock, server_addr, server_port, cache):
     """Receives a command from a client and forwards it to a server:port.
 
     A single command is read from `sock`. That command is passed to the specified
@@ -96,12 +104,13 @@ def ProxyClientCommand(sock, server_addr, server_port, cache):
     ###########################################
     #TODO: Implement ProxyClientCommand
     ###########################################
-    command_line = library.ReadCommand(sock)
+    command_line = library.ReadCommand(client_sock)
     response = CheckCachedResponse(command_line, cache)
     if not response:
         response = ForwardCommandToServer(command_line, server_addr, server_port)
 
-    sock.sendall(response)
+    client_sock.sendall('%s\n' % response)
+
 
 
 
@@ -118,12 +127,12 @@ def main():
         print('Received connection from %s:%d' % (address, port))
         ProxyClientCommand(client_sock, SERVER_ADDRESS, SERVER_PORT,
                            cache)
-
+        client_sock.close()
     #################################
     #TODO: Close socket's connection
     #################################
     # client_sock.close()
-    # server_sock.close()
+    server_sock.close()
 
 
 main()
