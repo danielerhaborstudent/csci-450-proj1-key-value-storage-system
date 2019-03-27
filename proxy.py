@@ -64,20 +64,18 @@ def CheckCachedResponse(command_line, cache):
     ##########################
     #TODO: Implement section
     ##########################
-    # If the response is None this means that we should forward the PUT or GET command.
-    # We always forward on the PUT command but use cached value for GET if it is in the cache
+
+    # If the response is None this means that we should forward the command either PUT, GET or DUMP
+    # We always forward on the PUT and DUMP commands but use cached value for GET if it is in the cache
     # See the usage in ProxyClientCommand
+
     response = None
-    if cmd == "PUT":
-      cache.StoreValue(name, text)
-
-
     # GET commands can be cached.
 
     ############################
     #TODO: Implement section
     ############################
-    elif cmd == "GET" and name in cache.Keys():
+    if cmd == "GET" and name in cache.Keys():
         response = cache.GetValue(name)
     return response
 
@@ -107,7 +105,12 @@ def ProxyClientCommand(client_sock, server_addr, server_port, cache):
     command_line = library.ReadCommand(client_sock)
     response = CheckCachedResponse(command_line, cache)
     if not response:
+        # If there is no response from the proxy, go to main server else get response from cache
         response = ForwardCommandToServer(command_line, server_addr, server_port)
+        cmd, name, text = library.ParseCommand(command_line)
+        if cmd == "GET":
+            # Only on the GET commands do we store the value in the cache if there was no response from the proxy
+            cache.StoreValue(name, response)
 
     client_sock.sendall('%s\n' % response)
 
